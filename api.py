@@ -34,12 +34,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - Configured for Streamlit Cloud and local development
+# Note: Using "*" to allow all origins since Streamlit Cloud uses dynamic subdomains
+# For production, you can restrict to specific domains if needed
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=["*"],  # Allows Streamlit Cloud (*.streamlit.app) and localhost
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
