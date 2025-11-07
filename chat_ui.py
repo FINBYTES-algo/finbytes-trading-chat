@@ -74,8 +74,24 @@ st.markdown("""
 # Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+# Get API URL from environment variable (for Streamlit Cloud) or use default
+env_api_url = os.getenv("API_URL", "")
+if env_api_url:
+    # If API_URL env var is set, use it (ensure it ends with /analyze)
+    if not env_api_url.endswith("/analyze"):
+        if env_api_url.endswith("/"):
+            env_api_url = env_api_url + "analyze"
+        else:
+            env_api_url = env_api_url + "/analyze"
+    default_api_url = env_api_url
+else:
+    # Default for local development
+    default_api_url = "http://localhost:8080/analyze"
+
 if "api_url" not in st.session_state:
-    st.session_state.api_url = os.getenv("API_URL", "http://localhost:8080/analyze")
+    st.session_state.api_url = default_api_url
+
 if "symbol" not in st.session_state:
     st.session_state.symbol = "AAPL"
 if "interval" not in st.session_state:
@@ -89,13 +105,22 @@ if "end_date" not in st.session_state:
 with st.sidebar:
     st.header("⚙️ Configuration")
     
-    # API endpoint
-    api_url = st.text_input(
-        "API Endpoint",
-        value=st.session_state.api_url,
-        help="URL of the FastAPI endpoint"
-    )
-    st.session_state.api_url = api_url
+    # API endpoint - show as read-only if set via environment variable
+    if env_api_url:
+        st.text_input(
+            "API Endpoint (from environment)",
+            value=st.session_state.api_url,
+            disabled=True,
+            help="API URL is set via API_URL environment variable"
+        )
+        api_url = st.session_state.api_url
+    else:
+        api_url = st.text_input(
+            "API Endpoint",
+            value=st.session_state.api_url,
+            help="URL of the FastAPI endpoint"
+        )
+        st.session_state.api_url = api_url
     
     st.markdown("---")
     st.header("📊 Data Settings")
